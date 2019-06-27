@@ -114,11 +114,6 @@ func (s *Status) End(success bool) {
 	if isTerm {
 		s.spinner.Stop()
 		fmt.Fprintf(s.writer, "\n")
-		/*if success {
-			fmt.Fprintf(s.writer, " [\u001b[32;1m\u001b[1m✔\u001b[0m] \n")
-		} else {
-			fmt.Fprintf(s.writer, " ✗\n")
-		}*/
 	} else {
 		if success {
 			fmt.Fprintf(s.writer, "• %s ✓\n", s.status)
