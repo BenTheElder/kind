@@ -62,8 +62,8 @@ func Cluster(ctx *context.Context, cfg *config.Cluster, opts *Options) error {
 		return err
 	}
 
-	status := status.New(os.Stdout)
-	status.MaybeWrapLogrus(log.StandardLogger())
+	status := status.New(os.Stderr)
+	//status.MaybeWrapLogrus(log.StandardLogger())
 
 	// attempt to explicitly pull the required node images if they doesn't exist locally
 	// we don't care if this errors, we'll still try to run which also pulls

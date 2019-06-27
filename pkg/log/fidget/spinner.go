@@ -20,7 +20,6 @@ package fidget
 import (
 	"fmt"
 	"io"
-	"sync"
 	"time"
 )
 
@@ -47,55 +46,35 @@ var spinnerFrames = []string{
 // It is simplistic and assumes that the line length will not change.
 // It is best used indirectly via log.Status (see parent package)
 type Spinner struct {
-	frames []string
-	stop   chan struct{}
-	ticker *time.Ticker
-	writer io.Writer
-	mu     *sync.Mutex
-	// protected by mu
-	prefix string
-	suffix string
+	stop    chan struct{}
+	stopped chan struct{}
+	ticker  *time.Ticker
+	writer  io.Writer
 }
 
 // NewSpinner initializes and returns a new Spinner that will write to
 func NewSpinner(w io.Writer) *Spinner {
 	return &Spinner{
-		frames: spinnerFrames,
-		stop:   make(chan struct{}, 1),
-		ticker: time.NewTicker(time.Millisecond * 100),
-		mu:     &sync.Mutex{},
-		writer: w,
+		stop:    make(chan struct{}),
+		stopped: make(chan struct{}),
+		ticker:  time.NewTicker(time.Millisecond * 50),
+		writer:  w,
 	}
-}
-
-// SetPrefix sets the prefix to print before the spinner
-func (s *Spinner) SetPrefix(prefix string) {
-	s.mu.Lock()
-	s.prefix = prefix
-	s.mu.Unlock()
-}
-
-// SetSuffix sets the suffix to print after the spinner
-func (s *Spinner) SetSuffix(suffix string) {
-	s.mu.Lock()
-	s.suffix = suffix
-	s.mu.Unlock()
 }
 
 // Start starts the spinner running
 func (s *Spinner) Start() {
 	go func() {
+		fmt.Fprintf(s.writer, "  ")
 		for {
-			for _, frame := range s.frames {
+			for _, frame := range spinnerFrames {
 				select {
 				case <-s.stop:
+					fmt.Fprintf(s.writer, "\b\b  \b\b")
+					s.stopped <- struct{}{}
 					return
 				case <-s.ticker.C:
-					func() {
-						s.mu.Lock()
-						defer s.mu.Unlock()
-						fmt.Fprintf(s.writer, "\r%s%s%s", s.prefix, frame, s.suffix)
-					}()
+					fmt.Fprintf(s.writer, "\b\b%s", frame)
 				}
 			}
 		}
@@ -105,4 +84,5 @@ func (s *Spinner) Start() {
 // Stop signals the spinner to stop
 func (s *Spinner) Stop() {
 	s.stop <- struct{}{}
+	<-s.stopped
 }

@@ -56,7 +56,6 @@ var _ io.Writer = &FriendlyWriter{}
 
 func (ww *FriendlyWriter) Write(p []byte) (n int, err error) {
 	ww.status.spinner.Stop()
-	ww.inner.Write([]byte("\r"))
 	n, err = ww.inner.Write(p)
 	ww.status.spinner.Start()
 	return n, err
@@ -97,10 +96,10 @@ func (s *Status) Start(status string) {
 	isTerm := env.IsTerminal(s.writer)
 	s.status = status
 	if isTerm {
-		s.spinner.SetSuffix(fmt.Sprintf(" %s ", s.status))
+		fmt.Fprintf(s.writer, "• %s  ", s.status)
 		s.spinner.Start()
 	} else {
-		fmt.Fprintf(s.writer, " • %s  ...\n", s.status)
+		fmt.Fprintf(s.writer, "• %s ...\n", s.status)
 	}
 }
 
@@ -114,13 +113,17 @@ func (s *Status) End(success bool) {
 	isTerm := env.IsTerminal(s.writer)
 	if isTerm {
 		s.spinner.Stop()
-		fmt.Fprint(s.writer, "\r")
-	}
-
-	if success {
-		fmt.Fprintf(s.writer, " ✓ %s\n", s.status)
+		if success {
+			fmt.Fprintf(s.writer, "✓\n")
+		} else {
+			fmt.Fprintf(s.writer, "✗\n")
+		}
 	} else {
-		fmt.Fprintf(s.writer, " ✗ %s\n", s.status)
+		if success {
+			fmt.Fprintf(s.writer, "• %s ✓\n", s.status)
+		} else {
+			fmt.Fprintf(s.writer, "• %s ✗\n", s.status)
+		}
 	}
 
 	s.status = ""
