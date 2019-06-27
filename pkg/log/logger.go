@@ -16,22 +16,34 @@ limitations under the License.
 
 package log
 
+
+
+
+// Writer represents command line output
+//
+// You can inject your own default Writer using SetDefault() with an
+// implementation of this interface.
+//
+// See also klog.Use() in our klog package under this one
+type Writer interface {
+	// Printf should be used to write user facing messages
+	Printf(format string, args ...interface{})
+	// Warnf should be used to write user facing warnings
+	Warnf(format string, args ...interface{})
+	// V(N > 0) returns a logger at a particular verbosity level,
+	// it should be used to write debug messages with detail increasing at
+	// each higher level like: V(1).Infof("My Debug Message")
+	V(Level) LevelLogger
+}
+
 // Level is a leveled logging level, see https://github.com/kubernetes/klog
 type Level int32
 
-// LeveledLogger is a subset of what https://github.com/kubernetes/klog
-// provides that kind's library code may use. You can (and should) inject your
-// own default logger using SetDefault()
-//
-// See also klog.Use() in our klog package under this one
-type LeveledLogger interface {
-	V(Level) Logger
-}
-
-// Logger is an interface like klog.Verbose
+// LevelLogger is an interface like a subset of klog.Verbose
 // see: https://github.com/kubernetes/klog
-type Logger interface {
-	Info(args ...interface{})
-	Infoln(args ...interface{})
+type LevelLogger interface {
+	// Enabled should return true if this verbosity level is enabled
+	Enabled() bool
+	// Infof should be used to write debug messages
 	Infof(format string, args ...interface{})
 }

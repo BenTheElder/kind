@@ -16,23 +16,23 @@ limitations under the License.
 
 package log
 
-import (
-	"sync"
-)
-
-var std LeveledLogger
-var stdMu sync.Mutex
+var std Writer
 
 // SetDefault sets the default logger
-func SetDefault(logger LeveledLogger) {
-	stdMu.Lock()
-	defer stdMu.Unlock()
-	std = logger
+func SetDefault(writer Writer) {
+	std = writer
 }
 
 // V is leveled logging implemented against the default logger
-func V(level Level) Logger {
-	stdMu.Lock()
-	defer stdMu.Unlock()
+func V(level Level) LevelLogger {
 	return std.V(level)
+}
+
+//
+func Printf(format string, args ...interface{}) {
+	std.Printf(format, args...)
+}
+
+func Warnf(format string, args ...interface{}) {
+	std.Warnf(format, args...)
 }
