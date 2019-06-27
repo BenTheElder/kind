@@ -57,7 +57,7 @@ func NewSpinner(w io.Writer) *Spinner {
 	return &Spinner{
 		stop:    make(chan struct{}),
 		stopped: make(chan struct{}),
-		ticker:  time.NewTicker(time.Millisecond * 50),
+		ticker:  time.NewTicker(time.Millisecond * 80),
 		writer:  w,
 	}
 }
