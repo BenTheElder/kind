@@ -23,6 +23,7 @@ import (
 
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions"
 	"sigs.k8s.io/kind/pkg/cluster/nodes"
+	"sigs.k8s.io/kind/pkg/log"
 )
 
 // Action implements an action for waiting for the cluster to be ready
@@ -65,13 +66,13 @@ func (a *Action) Execute(ctx *actions.ActionContext) error {
 	isReady := nodes.WaitForReady(node, startTime.Add(a.waitTime))
 	if !isReady {
 		ctx.Status.End(false)
-		fmt.Println(" • WARNING: Timed out waiting for Ready ⚠️")
+		log.Warnf("Timed out waiting for Ready ⚠️")
 		return nil
 	}
 
 	// mark success
 	ctx.Status.End(true)
-	fmt.Printf(" • Ready after %s 💚\n", formatDuration(time.Since(startTime)))
+	log.Printf(" • Ready after %s 💚\n", formatDuration(time.Since(startTime)))
 	return nil
 }
 

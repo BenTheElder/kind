@@ -29,15 +29,23 @@ func Use() {
 }
 
 // New returns an opaque implementation of log.LeveledLogger against klog
-func New() log.LeveledLogger {
-	return &leveledLogger{}
+func New() log.Logger {
+	return &logger{}
 }
 
-// leveledLogger implements log.LeveledLogger against klog
-type leveledLogger struct{}
+// logger implements log.Logger against klog
+type logger struct{}
 
-var _ log.LeveledLogger = &leveledLogger{}
+var _ log.Logger = &logger{}
 
-func (l *leveledLogger) V(level log.Level) log.Logger {
+func (l *logger) Printf(format string, args ...interface{}) {
+	klog.Printf(format, args...)
+}
+
+func (l *logger) Warnf(format string, args ...interface{}) {
+	klog.Warnf(format, args...)
+}
+
+func (l *logger) V(level log.Level) log.LevelLogger {
 	return klog.V(klog.Level(level))
 }

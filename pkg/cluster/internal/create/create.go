@@ -17,21 +17,14 @@ limitations under the License.
 package create
 
 import (
-	"fmt"
 	"os"
 	"runtime"
 	"time"
 
-	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions"
-
-	log "github.com/sirupsen/logrus"
-
 	"sigs.k8s.io/kind/pkg/cluster/config"
 	"sigs.k8s.io/kind/pkg/cluster/config/encoding"
 	"sigs.k8s.io/kind/pkg/cluster/internal/context"
-	"sigs.k8s.io/kind/pkg/cluster/internal/delete"
-	"sigs.k8s.io/kind/pkg/log/status"
-
+	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions"
 	configaction "sigs.k8s.io/kind/pkg/cluster/internal/create/actions/config"
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/installcni"
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/installstorage"
@@ -39,6 +32,9 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/kubeadmjoin"
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/loadbalancer"
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions/waitforready"
+	"sigs.k8s.io/kind/pkg/cluster/internal/delete"
+	"sigs.k8s.io/kind/pkg/log"
+	"sigs.k8s.io/kind/pkg/log/status"
 )
 
 const (
@@ -83,7 +79,8 @@ func Cluster(ctx *context.Context, cfg *config.Cluster, opts *Options) error {
 	// Create node containers implementing defined config Nodes
 	if err := provisionNodes(status, cfg, ctx.Name(), ctx.ClusterLabel()); err != nil {
 		// In case of errors nodes are deleted (except if retain is explicitly set)
-		log.Error(err)
+		// TODO: Errorf instead?
+		// log.Warnf("%v", err)
 		if !opts.Retain {
 			delete.Cluster(ctx)
 		}
@@ -139,7 +136,7 @@ func Cluster(ctx *context.Context, cfg *config.Cluster, opts *Options) error {
 func printUsage(name string) {
 	// TODO: consider shell detection.
 	if runtime.GOOS == "windows" {
-		fmt.Printf(
+		log.Printf(
 			"Cluster creation complete. To setup KUBECONFIG:\n\n"+
 
 				"For the default cmd.exe console call:\n"+
@@ -157,7 +154,7 @@ func printUsage(name string) {
 			name,
 		)
 	} else {
-		fmt.Printf(
+		log.Printf(
 			"Cluster creation complete. You can now use the cluster with:\n\n"+
 
 				"export KUBECONFIG=\"$(kind get kubeconfig-path --name=%q)\"\n"+
@@ -168,7 +165,7 @@ func printUsage(name string) {
 }
 
 func printSetupInstruction(name string) {
-	fmt.Printf(
+	log.Printf(
 		"Nodes creation complete. You can now setup kubernetes using docker exec %s-<node> kubeadm ...\n",
 		name,
 	)

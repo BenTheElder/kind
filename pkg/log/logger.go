@@ -16,16 +16,13 @@ limitations under the License.
 
 package log
 
-
-
-
 // Writer represents command line output
 //
 // You can inject your own default Writer using SetDefault() with an
 // implementation of this interface.
 //
 // See also klog.Use() in our klog package under this one
-type Writer interface {
+type Logger interface {
 	// Printf should be used to write user facing messages
 	Printf(format string, args ...interface{})
 	// Warnf should be used to write user facing warnings
