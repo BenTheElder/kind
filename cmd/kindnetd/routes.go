@@ -24,6 +24,13 @@ import (
 	"github.com/vishvananda/netlink/nl"
 )
 
+/*
+	Technically if this were a "real" routing daemon we'd want to "reserve" this
+	value in linux/rtnetlink.h
+	We're just using an unused value for now.
+*/
+const rtprot_Kindnetd = 0xBE
+
 func syncRoute(nodeIP, podCIDR string) error {
 	// parse subnet
 	dst, err := netlink.ParseIPNet(podCIDR)
@@ -33,7 +40,11 @@ func syncRoute(nodeIP, podCIDR string) error {
 
 	// Check if the route exists to the other node's PodCIDR
 	ip := net.ParseIP(nodeIP)
-	routeToDst := netlink.Route{Dst: dst, Gw: ip}
+	routeToDst := netlink.Route{
+		Dst: dst,
+		Gw: ip
+		Protocol: rtprot_Kindnetd,
+	}
 	route, err := netlink.RouteListFiltered(nl.GetIPFamily(ip), &routeToDst, netlink.RT_FILTER_DST)
 	if err != nil {
 		return err
