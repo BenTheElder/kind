@@ -14,8 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package klog contains logging related functionality
-package klog
+// Package klogger contains a klog backend for sigs.k8s.io/kind/pkg/log
+// TODO(bentheelder): once we tag a kind version with the log interface,
+// make this a submodule so we don't pull in klog?
+package klogger
 
 import (
 	"k8s.io/klog"
@@ -39,5 +41,22 @@ type leveledLogger struct{}
 var _ log.LeveledLogger = &leveledLogger{}
 
 func (l *leveledLogger) V(level log.Level) log.Logger {
-	return klog.V(klog.Level(level))
+	return kloggerLevel(klog.V(klog.Level(level)))
+}
+
+type kloggerLevel klog.Verbose
+
+// Print implements Print from the Logger interface
+func (kl kloggerLevel) Print(args ...interface{}) {
+	klog.Verbose(kl).Info(args...)
+}
+
+// Println implements Println from the Logger interface
+func (kl kloggerLevel) Println(args ...interface{}) {
+	klog.Verbose(kl).Infoln(args...)
+}
+
+// Printf implements Printf from the Logger interface
+func (kl kloggerLevel) Printf(format string, args ...interface{}) {
+	klog.Verbose(kl).Infof(format, args...)
 }

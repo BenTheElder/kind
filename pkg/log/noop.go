@@ -28,11 +28,11 @@ func (n NoopLeveledLogger) V(Level) Logger {
 // NoopLogger does not actually log but implements the Logger interface
 type NoopLogger struct{}
 
-// Info implements a no-op Info from the Logger interface
-func (n NoopLogger) Info(args ...interface{}) {}
+// Print implements a no-op Print from the Logger interface
+func (n NoopLogger) Print(args ...interface{}) {}
 
-// Infoln implements a no-op Infoln from the Logger interface
-func (n NoopLogger) Infoln(args ...interface{}) {}
+// Println implements a no-op Println from the Logger interface
+func (n NoopLogger) Println(args ...interface{}) {}
 
-// Infof implements a no-op Infof from the Logger interface
-func (n NoopLogger) Infof(format string, args ...interface{}) {}
+// Printf implements a no-op Printf from the Logger interface
+func (n NoopLogger) Printf(format string, args ...interface{}) {}

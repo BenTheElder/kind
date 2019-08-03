@@ -31,7 +31,7 @@ type LeveledLogger interface {
 // Logger is an interface like klog.Verbose
 // see: https://github.com/kubernetes/klog
 type Logger interface {
-	Info(args ...interface{})
-	Infoln(args ...interface{})
-	Infof(format string, args ...interface{})
+	Print(args ...interface{})
+	Println(args ...interface{})
+	Printf(format string, args ...interface{})
 }
