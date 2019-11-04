@@ -17,21 +17,26 @@ limitations under the License.
 package app
 
 import (
+	"context"
 	"os"
 
+	"sigs.k8s.io/kind/pkg/log"
+	"sigs.k8s.io/kind/pkg/cmd"
 	"sigs.k8s.io/kind/pkg/cmd/kind"
 )
 
 // Main is the kind main(), it will invoke Run(), if an error is returned
 // it will then call os.Exit
 func Main() {
-	if err := Run(); err != nil {
+	ctx := log.NewContext(context.Background(), log.NewCLILogger())
+	streams := cmd.StandardIOStreams()
+	if err := Run(ctx, streams); err != nil {
 		os.Exit(1)
 	}
 }
 
 // Run invokes the kind root command, returning the error.
 // See: sigs.k8s.io/kind/pkg/cmd/kind
-func Run() error {
-	return kind.NewCommand().Execute()
+func Run(ctx context.Context, streams cmd.IOStreams) error {
+	return kind.NewCommand(ctx, streams).Execute()
 }

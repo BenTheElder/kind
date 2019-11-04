@@ -18,10 +18,13 @@ limitations under the License.
 package kind
 
 import (
+	"context"
+	"io"
 	"os"
 
 	"github.com/spf13/cobra"
 
+	"sigs.k8s.io/kind/pkg/cmd"
 	"sigs.k8s.io/kind/pkg/cmd/kind/build"
 	"sigs.k8s.io/kind/pkg/cmd/kind/completion"
 	"sigs.k8s.io/kind/pkg/cmd/kind/create"
@@ -44,15 +47,15 @@ type Flags struct {
 }
 
 // NewCommand returns a new cobra.Command implementing the root command for kind
-func NewCommand() *cobra.Command {
+func NewCommand(ctx context.Context, streams cmd.IOStreams) *cobra.Command {
 	flags := &Flags{}
-	cmd := &cobra.Command{
+	command := &cobra.Command{
 		Args:  cobra.NoArgs,
 		Use:   "kind",
 		Short: "kind is a tool for managing local Kubernetes clusters",
 		Long:  "kind creates and manages local Kubernetes clusters using Docker container 'nodes'",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			err := runE(flags, cmd)
+		PersistentPreRunE: func(command *cobra.Command, args []string) error {
+			err := runE(flags, command, os.Stderr)
 			if err != nil {
 				logError(err)
 			}
@@ -62,20 +65,20 @@ func NewCommand() *cobra.Command {
 		SilenceErrors: true,
 		Version:       version.Version(),
 	}
-	cmd.PersistentFlags().StringVar(
+	command.PersistentFlags().StringVar(
 		&flags.LogLevel,
 		"loglevel",
 		"",
 		"DEPRECATED: see -v instead",
 	)
-	cmd.PersistentFlags().Int32VarP(
+	command.PersistentFlags().Int32VarP(
 		&flags.Verbosity,
 		"verbosity",
 		"v",
 		0,
 		"info log verbosity",
 	)
-	cmd.PersistentFlags().BoolVarP(
+	command.PersistentFlags().BoolVarP(
 		&flags.Quiet,
 		"quiet",
 		"q",
@@ -83,21 +86,21 @@ func NewCommand() *cobra.Command {
 		"silence all stderr output",
 	)
 	// add all top level subcommands
-	cmd.AddCommand(build.NewCommand())
-	cmd.AddCommand(completion.NewCommand())
-	cmd.AddCommand(create.NewCommand())
-	cmd.AddCommand(delete.NewCommand())
-	cmd.AddCommand(export.NewCommand())
-	cmd.AddCommand(get.NewCommand())
-	cmd.AddCommand(version.NewCommand())
-	cmd.AddCommand(load.NewCommand())
-	return cmd
+	command.AddCommand(build.NewCommand())
+	command.AddCommand(completion.NewCommand())
+	command.AddCommand(create.NewCommand())
+	command.AddCommand(delete.NewCommand())
+	command.AddCommand(export.NewCommand())
+	command.AddCommand(get.NewCommand())
+	command.AddCommand(version.NewCommand())
+	command.AddCommand(load.NewCommand())
+	return command
 }
 
-func runE(flags *Flags, cmd *cobra.Command) error {
+func runE(flags *Flags, command *cobra.Command, errOut io.Writer) error {
 	// handle limited migration for --loglevel
-	setLogLevel := cmd.Flag("loglevel").Changed
-	setVerbosity := cmd.Flag("verbosity").Changed
+	setLogLevel := command.Flag("loglevel").Changed
+	setVerbosity := command.Flag("verbosity").Changed
 	if setLogLevel && !setVerbosity {
 		switch flags.LogLevel {
 		case "debug":
@@ -110,7 +113,7 @@ func runE(flags *Flags, cmd *cobra.Command) error {
 	if flags.Quiet {
 		globals.SetLogger(log.NoopLogger{})
 	} else {
-		globals.UseCLILogger(os.Stderr, log.Level(flags.Verbosity))
+		globals.UseCLILogger(errOut, log.Level(flags.Verbosity))
 	}
 	// warn about deprecated flag if used
 	if setLogLevel {
