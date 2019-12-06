@@ -10,5 +10,6 @@ jobs:
       - name: Run docker
         run: |
           brew cask install docker
-          open -a Docker
+          open --background -a Docker &
+          echo "foo"
           while true; do /Applications/Docker.app/Contents/Resources/bin/docker run --rm hello-world && exit 0; done
