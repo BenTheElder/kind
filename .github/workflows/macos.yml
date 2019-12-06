@@ -1,0 +1,14 @@
+name: Go
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: [macOS-latest]
+    steps:
+
+      - name: Run docker
+        run: |
+          brew cask install docker
+          open -a Docker
+          while true; do /Applications/Docker.app/Contents/Resources/bin/docker run --rm hello-world && exit 0; done
