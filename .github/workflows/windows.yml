@@ -1,0 +1,13 @@
+name: Go
+on: [push]
+jobs:
+
+  build:
+    name: Build
+    runs-on: [windows-latest]
+    steps:
+
+      - name: Run docker
+        run: |
+          choco install docker-desktop
+          docker info
