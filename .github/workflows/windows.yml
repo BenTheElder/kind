@@ -1,13 +1,22 @@
 name: Go
 on: [push]
 jobs:
-
   build:
     name: Build
     runs-on: [windows-latest]
     steps:
-
-      - name: Run docker
+      - name: Install docker
         run: |
           choco install docker-desktop
+      - name: Switch to Linux Containers
+        run: |
+          start /d"C:\Program Files\Docker\Docker\" DockerCli.exe -SwitchLinuxEngine
+      - name: Check docker
+        run: |
           docker info
+      - name: Install kind
+        run: |
+          choco install kind
+      - name: Create cluster
+        run: |
+          kind create cluster
