@@ -5,6 +5,7 @@ jobs:
     name: Build
     runs-on: [windows-latest]
     steps:
+      - name: LCOW
         run: |
           Set-Content -Value "`{`"experimental`":true`}" -Path C:\ProgramData\docker\config\daemon.json
           [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
