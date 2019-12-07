@@ -5,18 +5,17 @@ jobs:
     name: Build
     runs-on: [windows-latest]
     steps:
-      #- name: Install preview docker
-      #  run: |
-      #    Uninstall-Package -Name docker -ProviderName DockerMSFTProvider
-      #    Install-Module DockerProvider
-      #    Install-Package Docker -ProviderName DockerProvider -RequiredVersion preview
+      - name: Install preview docker
+        run: |
+          Install-Module -Name DockerMsftProvider -Force
+          Install-Package Docker -ProviderName DockerProvider -RequiredVersion preview -Force
       - name: Switch to Linux Containers
         run: |
           [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
           Restart-Service docker
       - name: Check docker
         run: |
-          docker info
+          docker version
       - name: Install kind
         run: |
           choco install kind
