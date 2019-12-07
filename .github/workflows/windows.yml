@@ -5,20 +5,10 @@ jobs:
     name: Build
     runs-on: [windows-latest]
     steps:
-      - name: Install preview docker
         run: |
-          Install-Module -Name DockerProvider -Repository PSGallery -Force
-          Install-Package Docker -ProviderName DockerProvider -RequiredVersion preview -Force
-      - name: Switch to Linux Containers
-        run: |
+          Set-Content -Value "`{`"experimental`":true`}" -Path C:\ProgramData\docker\config\daemon.json
           [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
           Restart-Service docker
       - name: Check docker
         run: |
           docker version
-      - name: Install kind
-        run: |
-          choco install kind
-      - name: Create cluster
-        run: |
-          kind create cluster
