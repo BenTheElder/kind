@@ -9,7 +9,7 @@ jobs:
         run: |
           choco install docker-desktop
       - name: Switch to Linux Containers
-        working-directory: "C:\Program Files\Docker\Docker"
+        working-directory: C:\Program Files\Docker\Docker
         run: |
          ./DockerCli.exe -SwitchLinuxEngine
       - name: Check docker
