@@ -7,6 +7,7 @@ jobs:
     steps:
       - name: Install preview docker
         run: |
+          Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
           Install-Module -Name DockerMsftProvider -Force
           Install-Package Docker -ProviderName DockerProvider -RequiredVersion preview -Force
       - name: Switch to Linux Containers
