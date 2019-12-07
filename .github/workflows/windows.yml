@@ -11,6 +11,7 @@ jobs:
           Expand-Archive release.zip -DestinationPath "$Env:ProgramFiles\Linux Containers\."
           [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
           [Environment]::SetEnvironmentVariable("LCOW_API_PLATFORM_IF_OMITTED", "linux", "Machine")
+          Set-Content -Value "`{`"experimental`":true`}" -Path C:\ProgramData\docker\config\daemon.json
           Restart-Service docker
       - name: Check docker
         run: |
