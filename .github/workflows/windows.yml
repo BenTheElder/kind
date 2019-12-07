@@ -7,11 +7,8 @@ jobs:
     steps:
       - name: hyper-v
         run: |
-          Enable-WindowsOptionalFeature `
-            -FeatureName "Microsoft-Hyper-V", "Containers" `
-            -Online `
-            -All `
-            -NoRestart ;
+          Import-PackageProvider NanoServerPackage
+          install-NanoServerPackage -name Microsoft-NanoServer-Compute-Package
       - name: LCOW
         run: |
           Invoke-WebRequest -Uri "https://github.com/linuxkit/lcow/releases/download/v4.14.35-v0.3.9/release.zip" -UseBasicParsing -OutFile release.zip
