@@ -15,3 +15,6 @@ jobs:
       - name: Check docker
         run: |
           docker version
+      - name: Check LCOW
+        run: |
+          docker run --rm hello-world:linux
