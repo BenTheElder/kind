@@ -5,6 +5,13 @@ jobs:
     name: Build
     runs-on: [windows-latest]
     steps:
+      - name: hyper-v
+        run: |
+          Enable-WindowsOptionalFeature `
+            -FeatureName "Microsoft-Hyper-V", "Containers" `
+            -Online `
+            -All `
+            -NoRestart ;
       - name: LCOW
         run: |
           Invoke-WebRequest -Uri "https://github.com/linuxkit/lcow/releases/download/v4.14.35-v0.3.9/release.zip" -UseBasicParsing -OutFile release.zip
