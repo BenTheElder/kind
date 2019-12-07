@@ -5,13 +5,15 @@ jobs:
     name: Build
     runs-on: [windows-latest]
     steps:
-      - name: Install docker
+      - name: Install preview docker
         run: |
-          choco install docker-desktop
+          Uninstall-Package -Name docker -ProviderName DockerMSFTProvider
+          Install-Module DockerProvider
+          Install-Package Docker -ProviderName DockerProvider -RequiredVersion preview
       - name: Switch to Linux Containers
-        working-directory: C:\Program Files\Docker\Docker
         run: |
-         ./DockerCli.exe -SwitchLinuxEngine
+          [Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")
+          Restart-Service docker
       - name: Check docker
         run: |
           docker info
