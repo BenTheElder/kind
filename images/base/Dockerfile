@@ -18,7 +18,7 @@
 # https://www.freedesktop.org/wiki/Software/systemd/ContainerInterface/
 
 # start from kubernetes' small custom debian base image
-FROM ubuntu:19.10
+FROM k8s.gcr.io/debian-base:v2.0.0
 
 # Configure containerd and runc binaries from kind-ci/containerd-nightlies repository
 # The repository contains latest stable releases and nightlies built for multiple architectures
@@ -37,9 +37,10 @@ COPY files/ /
 # First we must ensure that our util scripts are executable.
 #
 # Packages installed are broken down into (each on a line):
+# - packages needed for containerd (from backports, we need recent libseccomp)
+#
 # - packages needed to run services (systemd)
 # - packages needed for kubernetes components
-# - packages needed for containerd (from backports, we need recent libseccomp)
 # - misc packages kind uses itself
 # After installing packages we cleanup by:
 # - removing unwanted systemd services
@@ -62,10 +63,12 @@ COPY files/ /
 RUN echo "Ensuring scripts are executable ..." \
     && chmod +x /usr/local/bin/clean-install /usr/local/bin/entrypoint \
  && echo "Installing Packages ..." \
+    && echo "deb http://ftp.debian.org/debian buster-backports main" >> /etc/apt/sources.list.d/backports.list \
+    && DEBIAN_FRONTEND=noninteractive clean-install -t buster-backports \
+      libseccomp2 \
     && DEBIAN_FRONTEND=noninteractive clean-install \
       systemd systemd-sysv libsystemd0 \
       conntrack iptables iproute2 ethtool socat util-linux mount ebtables udev kmod \
-      libseccomp2 \
       bash ca-certificates curl rsync \
     && find /lib/systemd/system/sysinit.target.wants/ -name "systemd-tmpfiles-setup.service" -delete \
     && rm -f /lib/systemd/system/multi-user.target.wants/* \
@@ -77,6 +80,7 @@ RUN echo "Ensuring scripts are executable ..." \
     && echo "ReadKMsg=no" >> /etc/systemd/journald.conf \
     && update-alternatives --set iptables /usr/sbin/iptables-legacy \
     && update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy \
+    && update-alternatives --set arptables /usr/sbin/arptables-legacy \
     && update-alternatives --set ebtables /usr/sbin/ebtables-legacy \
  && echo "Installing containerd ..." \
     && export ARCH=$(dpkg --print-architecture | sed 's/ppc64el/ppc64le/' | sed 's/armhf/arm/') \
