@@ -37,10 +37,9 @@ COPY files/ /
 # First we must ensure that our util scripts are executable.
 #
 # Packages installed are broken down into (each on a line):
-# - packages needed for containerd (from backports, we need recent libseccomp)
-#
 # - packages needed to run services (systemd)
 # - packages needed for kubernetes components
+# - packages needed for containerd (from backports, we need recent libseccomp)
 # - misc packages kind uses itself
 # After installing packages we cleanup by:
 # - removing unwanted systemd services
@@ -63,12 +62,10 @@ COPY files/ /
 RUN echo "Ensuring scripts are executable ..." \
     && chmod +x /usr/local/bin/clean-install /usr/local/bin/entrypoint \
  && echo "Installing Packages ..." \
-    && echo "deb http://ftp.debian.org/debian buster-backports main" >> /etc/apt/sources.list.d/backports.list \
-    && DEBIAN_FRONTEND=noninteractive clean-install -t buster-backports \
-      libseccomp2 \
     && DEBIAN_FRONTEND=noninteractive clean-install \
       systemd systemd-sysv libsystemd0 \
       conntrack iptables iproute2 ethtool socat util-linux mount ebtables udev kmod \
+      libseccomp2 \
       bash ca-certificates curl rsync \
     && find /lib/systemd/system/sysinit.target.wants/ -name "systemd-tmpfiles-setup.service" -delete \
     && rm -f /lib/systemd/system/multi-user.target.wants/* \
