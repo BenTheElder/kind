@@ -40,6 +40,7 @@ COPY files/ /
 # Packages installed are broken down into (each on a line):
 # - packages needed to run services (systemd)
 # - packages needed for kubernetes components
+# - packages needed for containerd
 # - misc packages kind uses itself
 # After installing packages we cleanup by:
 # - removing unwanted systemd services
@@ -65,6 +66,7 @@ RUN echo "Ensuring scripts are executable ..." \
     && DEBIAN_FRONTEND=noninteractive clean-install \
       systemd systemd-sysv libsystemd0 \
       conntrack iptables iproute2 ethtool socat util-linux mount ebtables udev kmod \
+      libseccomp2 \
       bash ca-certificates curl rsync \
     && find /lib/systemd/system/sysinit.target.wants/ -name "systemd-tmpfiles-setup.service" -delete \
     && rm -f /lib/systemd/system/multi-user.target.wants/* \
