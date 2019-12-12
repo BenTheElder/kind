@@ -18,7 +18,7 @@
 # https://www.freedesktop.org/wiki/Software/systemd/ContainerInterface/
 
 # start from kubernetes' small custom debian base image
-FROM ubuntu:20.04
+FROM ubuntu:19.10
 
 # Configure containerd and runc binaries from kind-ci/containerd-nightlies repository
 # The repository contains latest stable releases and nightlies built for multiple architectures
