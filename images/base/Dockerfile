@@ -18,7 +18,7 @@
 # https://www.freedesktop.org/wiki/Software/systemd/ContainerInterface/
 
 # start from kubernetes' small custom debian base image
-FROM k8s.gcr.io/debian-base:v2.0.0
+FROM ubuntu:20.04
 
 # Configure containerd and runc binaries from kind-ci/containerd-nightlies repository
 # The repository contains latest stable releases and nightlies built for multiple architectures
@@ -78,6 +78,10 @@ RUN echo "Ensuring scripts are executable ..." \
     && rm -f /lib/systemd/system/sockets.target.wants/*initctl* \
     && rm -f /lib/systemd/system/basic.target.wants/* \
     && echo "ReadKMsg=no" >> /etc/systemd/journald.conf \
+    && update-alternatives --set iptables /usr/sbin/iptables-legacy \
+    && update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy \
+    && update-alternatives --set arptables /usr/sbin/arptables-legacy \
+    && update-alternatives --set ebtables /usr/sbin/ebtables-legacy \
  && echo "Installing containerd ..." \
     && export ARCH=$(dpkg --print-architecture | sed 's/ppc64el/ppc64le/' | sed 's/armhf/arm/') \
     && export CONTAINERD_BASE_URL="https://github.com/kind-ci/containerd-nightlies/releases/download/containerd-${CONTAINERD_VERSION#v}" \
