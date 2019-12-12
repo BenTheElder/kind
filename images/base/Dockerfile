@@ -80,7 +80,6 @@ RUN echo "Ensuring scripts are executable ..." \
     && echo "ReadKMsg=no" >> /etc/systemd/journald.conf \
     && update-alternatives --set iptables /usr/sbin/iptables-legacy \
     && update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy \
-    && update-alternatives --set arptables /usr/sbin/arptables-legacy \
     && update-alternatives --set ebtables /usr/sbin/ebtables-legacy \
  && echo "Installing containerd ..." \
     && export ARCH=$(dpkg --print-architecture | sed 's/ppc64el/ppc64le/' | sed 's/armhf/arm/') \
