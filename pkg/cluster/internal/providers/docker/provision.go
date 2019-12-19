@@ -126,6 +126,8 @@ func commonArgs(cluster string, cfg *config.Cluster) ([]string, error) {
 		// label the node with the cluster ID
 		"--label", fmt.Sprintf("%s=%s", clusterLabelKey, cluster),
 		"--label", fmt.Sprintf("%s=%s", clusterLabelKey, cluster),
+		// use cluster network
+		"--net", fmt.Sprintf("kind-%s", cluster),
 	}
 
 	// enable IPv6 if necessary

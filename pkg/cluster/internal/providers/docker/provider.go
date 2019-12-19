@@ -54,6 +54,19 @@ func (p *Provider) Provision(status *cli.Status, cluster string, cfg *config.Clu
 	// ensure node images are pulled before actually provisioning
 	ensureNodeImages(p.logger, status, cfg)
 
+	// create network
+	exec.Command(
+		"docker", "network", "rm",
+		fmt.Sprintf("kind-%s", cluster),
+	).Run()
+	if err := exec.Command(
+		"docker", "network", "create", "--driver=bridge",
+		"--label", fmt.Sprintf("%s=%s", clusterLabelKey, cluster),
+		fmt.Sprintf("kind-%s", cluster),
+	).Run(); err != nil {
+		return errors.Wrapf(err, "failed to create network")
+	}
+
 	// actually provision the cluster
 	// TODO: strings.Repeat("📦", len(desiredNodes))
 	status.Start("Preparing nodes 📦")
@@ -112,8 +125,13 @@ func (p *Provider) ListNodes(cluster string) ([]nodes.Node, error) {
 	return ret, nil
 }
 
-// DeleteNodes is part of the providers.Provider interface
-func (p *Provider) DeleteNodes(n []nodes.Node) error {
+// Deprovision is part of the providers.Provider interface
+func (p *Provider) Deprovision(cluster string) error {
+	// delete the nodes first
+	n, err := p.ListNodes(cluster)
+	if err != nil {
+		return err
+	}
 	if len(n) == 0 {
 		return nil
 	}

@@ -17,7 +17,6 @@ limitations under the License.
 package delete
 
 import (
-	"sigs.k8s.io/kind/pkg/errors"
 	"sigs.k8s.io/kind/pkg/log"
 
 	"sigs.k8s.io/kind/pkg/cluster/internal/context"
@@ -29,17 +28,12 @@ import (
 // explicitKubeconfigPath is --kubeconfig, following the rules from
 // https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands
 func Cluster(logger log.Logger, c *context.Context, explicitKubeconfigPath string) error {
-	n, err := c.ListNodes()
-	if err != nil {
-		return errors.Wrap(err, "error listing nodes")
-	}
-
 	kerr := kubeconfig.Remove(c.Name(), explicitKubeconfigPath)
 	if kerr != nil {
 		logger.Errorf("failed to update kubeconfig: %v", kerr)
 	}
 
-	err = c.Provider().DeleteNodes(n)
+	err := c.Provider().Deprovision(c.Name())
 	if err != nil {
 		return err
 	}
