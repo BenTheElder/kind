@@ -18,6 +18,8 @@ limitations under the License.
 package kubeadminit
 
 import (
+	"os"
+	"strconv"
 	"strings"
 
 	"sigs.k8s.io/kind/pkg/errors"
@@ -56,21 +58,29 @@ func (a *action) Execute(ctx *actions.ActionContext) error {
 		return err
 	}
 
-	// run kubeadm
-	cmd := node.Command(
-		// init because this is the control plane node
-		"kubeadm", "init",
-		// preflight errors are expected, in particular for swap being enabled
-		// TODO(bentheelder): limit the set of acceptable errors
-		"--ignore-preflight-errors=all",
-		// specify our generated config file
-		"--config=/kind/kubeadm.conf",
-		"--skip-token-print",
-		// increase verbosity for debugging
-		"--v=6",
-	)
-	lines, err := exec.CombinedOutputLines(cmd)
-	ctx.Logger.V(3).Info(strings.Join(lines, "\n"))
+	// run kubeadm init with retries
+	tries := getTries()
+	ctx.Logger.V(3).Infof("Trying kubeadm init %d times", tries)
+	for i := 0; i < tries; i++ {
+		cmd := node.Command(
+			// init because this is the control plane node
+			"kubeadm", "init",
+			// preflight errors are expected, in particular for swap being enabled
+			// TODO(bentheelder): limit the set of acceptable errors
+			"--ignore-preflight-errors=all",
+			// specify our generated config file
+			"--config=/kind/kubeadm.conf",
+			"--skip-token-print",
+			// increase verbosity for debugging
+			"--v=6",
+		)
+		lines, err2 := exec.CombinedOutputLines(cmd)
+		err = err2
+		ctx.Logger.V(3).Info(strings.Join(lines, "\n"))
+		if err == nil {
+			break
+		}
+	}
 	if err != nil {
 		return errors.Wrap(err, "failed to init node with kubeadm")
 	}
@@ -112,4 +122,13 @@ func (a *action) Execute(ctx *actions.ActionContext) error {
 	// mark success
 	ctx.Status.End(true)
 	return nil
+}
+
+func getTries() int {
+	s := os.Getenv("KIND_UNSUPPORTED_KUBEADM_INIT_TRIES")
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 1
+	}
+	return i
 }
