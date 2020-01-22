@@ -56,6 +56,9 @@ func getProxyEnvs(cfg *config.Cluster, getEnv func(string) string) map[string]st
 		if noProxy != "" {
 			noProxy += ","
 		}
+		// never proxy loopback
+		noProxy += "localhost,127.0.0.1/8,::1,"
+		// don't proxy cluster IPs
 		noProxy += cfg.Networking.ServiceSubnet + "," + cfg.Networking.PodSubnet
 		envs[NOProxy] = noProxy
 		envs[strings.ToLower(NOProxy)] = noProxy
