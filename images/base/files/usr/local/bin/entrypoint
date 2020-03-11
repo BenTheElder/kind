@@ -144,6 +144,9 @@ fix_machine_id
 fix_product_name
 fix_product_uuid
 configure_proxy
+# NOTE: order matters here(!)
+select-iptables
+enable-network-hijinks
 
 # we want the command (expected to be systemd) to be PID1, so exec to it
 exec "$@"
