@@ -26,7 +26,7 @@ DOCKER_MAGIC_DNS_IPV4='127.0.0.11'
 # - to repurpose as the non-local DNS ip
 # - to ensure that a hostname exists for other hijinks (TODO)
 DOCKER_HOST='host.docker.internal'
-DOCKER_HOST_IPV4="$((getent ahostsv4 "$DOCKER_HOST" | head -n1 | cut -d' ' -f1) || true)"
+DOCKER_HOST_IPV4="$( (getent ahostsv4 "$DOCKER_HOST" | head -n1 | cut -d' ' -f1) || true)"
 if [[ -z "${DOCKER_HOST_IPV4}" ]]; then
   DOCKER_HOST_IPV4=$(ip -4 route show default | cut -d' ' -f3)
 fi
@@ -48,9 +48,8 @@ echo "${new_rules}" | "iptables-restore" -n
 
 # now we can ensure that DNS is configured to use our IP
 set_nameserver() {
-  f="$(mktemp)"
-  sed -e "s/${DOCKER_MAGIC_DNS_IPV4}/${DOCKER_HOST_IPV4}/g" /etc/resolv.conf >>"$f"
-  mv "$f" /etc/resolv.conf
+  cp /etc/resolv.conf /etc/resolv.conf.original
+  sed -e "s/${DOCKER_MAGIC_DNS_IPV4}/${DOCKER_HOST_IPV4}/g" /etc/resolv.conf.original >/etc/resolv.conf
 }
 set_nameserver
 
