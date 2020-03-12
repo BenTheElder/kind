@@ -38,13 +38,14 @@ initial_nat="$(iptables-save -t nat)"
 generate_rules(){
   local curr_rules="$1"
   relevant_rules="$(echo "${curr_rules}" | grep -o '.* -d '"${DOCKER_MAGIC_DNS_IPV4}"'.*')"
-  echo '*nat'
-  sed -e "s/-d ${DOCKER_MAGIC_DNS_IPV4}/-d ${DOCKER_HOST_IPV4}/g" <<<"${relevant_rules}"
-  echo 'COMMIT'
+  sed \
+    -e "s/-d ${DOCKER_MAGIC_DNS_IPV4}/-d ${DOCKER_HOST_IPV4}/g" \
+    -e "s/--to-source :53/--to-source ${DOCKER_HOST_IPV4}:53/g" \
+    <<<"${relevant_rules}"
 }
 new_rules="$(generate_rules "${initial_nat}")"
 # and write them to iptables
-echo "${new_rules}" | "iptables-restore" -n
+echo "${new_rules}" | "iptables-restore"
 
 # now we can ensure that DNS is configured to use our IP
 set_nameserver() {
