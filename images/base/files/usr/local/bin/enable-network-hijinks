@@ -14,48 +14,34 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o errexit
-set -o nounset
-set -o pipefail
-set -x;
+set -o errexit -o nounset -o pipefail
 
-# well known docker embedded DNS is 127.0.0.11:53
+# well-known docker embedded DNS is at 127.0.0.11:53
 DOCKER_MAGIC_DNS_IPV4='127.0.0.11'
 
 # first we need to detect an IP to use for reaching the docker host
-# we'll use this for two things:
-# - to repurpose as the non-local DNS ip
-# - to ensure that a hostname exists for other hijinks (TODO)
 DOCKER_HOST='host.docker.internal'
 DOCKER_HOST_IPV4="$( (getent ahostsv4 "$DOCKER_HOST" | head -n1 | cut -d' ' -f1) || true)"
 if [[ -z "${DOCKER_HOST_IPV4}" ]]; then
   DOCKER_HOST_IPV4=$(ip -4 route show default | cut -d' ' -f3)
 fi
 
-# get the current iptables rules, docker generates some for 127.0.0.11:53
-# this is not documented, but appears to be true across docker environments
-initial_nat="$(iptables-save -t nat)"
-# we will then generate rules based on docker's for our desired IP
-generate_rules(){
-  local curr_rules="$1"
-  #relevant_rules="$(echo "${curr_rules}" | grep -o '.* -d '"${DOCKER_MAGIC_DNS_IPV4}"'.*')"
+# patch docker's iptables rules to switch out the DNS IP
+# they are not documented, but appear to be consistent across docker environments
+patch_rules(){
   sed \
+    `# switch docker DNS DNAT rules to our chosen IP` \
     -e "s/-d ${DOCKER_MAGIC_DNS_IPV4}/-d ${DOCKER_HOST_IPV4}/g" \
-    -e "s/--to-source :53/--to-source ${DOCKER_HOST_IPV4}:53/g" \
-    <<<"${curr_rules}"
+   `# we need to also apply these rules to non-local traffic (from pods)` \
+    -e 's/-A OUTPUT \(.*\) -j DOCKER_OUTPUT/\0\n-A PREROUTING \1 -j DOCKER_OUTPUT/' \
+    `# switch docker DNS SNAT rules rules to our chosen IP` \
+    -e "s/--to-source :53/--to-source ${DOCKER_HOST_IPV4}:53/g"
 }
-new_rules="$(generate_rules "${initial_nat}")"
-# and write them to iptables
-echo "${new_rules}" | "iptables-restore"
-# we need to add a PREROUTING rule
-iptables -t nat -A PREROUTING -d "${DOCKER_HOST_IPV4}" -j DOCKER_OUTPUT
+iptables-save | patch_rules | iptables-restore
 
 # now we can ensure that DNS is configured to use our IP
-set_nameserver() {
-  cp /etc/resolv.conf /etc/resolv.conf.original
-  sed -e "s/${DOCKER_MAGIC_DNS_IPV4}/${DOCKER_HOST_IPV4}/g" /etc/resolv.conf.original >/etc/resolv.conf
-}
-set_nameserver
+cp /etc/resolv.conf /etc/resolv.conf.original
+sed -e "s/${DOCKER_MAGIC_DNS_IPV4}/${DOCKER_HOST_IPV4}/g" /etc/resolv.conf.original >/etc/resolv.conf
 
 # create a magic host entry that roughly works across linux, mac, windows ...
 echo "${DOCKER_HOST_IPV4} host.kind.internal" >>/etc/hosts
