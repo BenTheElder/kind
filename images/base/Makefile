@@ -7,7 +7,7 @@ export DOCKER_CLI_EXPERIMENTAL=enabled
 PLATFORMS?=linux/amd64,linux/arm64
 OUTPUT=
 build: ensure-buildx
-	docker buildx build --platform=${PLATFORMS} $(OUTPUT) -t ${IMAGE} --pull .
+	docker buildx build --platform=${PLATFORMS} $(OUTPUT) -t ${IMAGE} --pull --no-cache .
 
 # push the cross built image
 push: OUTPUT=--push
