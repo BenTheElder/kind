@@ -63,6 +63,8 @@ func (a *action) Execute(ctx *actions.ActionContext) error {
 		// preflight errors are expected, in particular for swap being enabled
 		// TODO(bentheelder): limit the set of acceptable errors
 		"--ignore-preflight-errors=all",
+		// just skip preflight altogether
+		"--skip-phases=preflight",
 		// specify our generated config file
 		"--config=/kind/kubeadm.conf",
 		"--skip-token-print",

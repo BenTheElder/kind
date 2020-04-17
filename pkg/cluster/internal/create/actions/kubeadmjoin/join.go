@@ -126,6 +126,8 @@ func runKubeadmJoin(logger log.Logger, node nodes.Node) error {
 		// preflight errors are expected, in particular for swap being enabled
 		// TODO(bentheelder): limit the set of acceptable errors
 		"--ignore-preflight-errors=all",
+		// just skip preflight altogether
+		"--skip-phases=preflight",
 		// increase verbosity for debugging
 		"--v=6",
 	)
