@@ -43,6 +43,7 @@ fix_mount() {
   echo 'INFO: making mounts shared' >&2
   # for mount propagation
   mount --make-rshared /
+  mount --make-rprivate /sys/fs/cgroup
 }
 
 fix_cgroup() {
