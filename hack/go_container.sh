@@ -30,7 +30,7 @@ SOURCE_DIR="${SOURCE_DIR:-$(pwd -P)}"
 # default to disabling CGO for easier reproducible builds and cross compilation
 export CGO_ENABLED="${CGO_ENABLED:-0}"
 # the container image, by default a recent official golang image
-GOIMAGE="${GOIMAGE:-golang:1.15rc1}"
+GOIMAGE="${GOIMAGE:-golang:${GOVERSION}}"
 # docker volume name, used as a go module / build cache
 CACHE_VOLUME="${CACHE_VOLUME:-kind-build-cache}"
 # allow overriding docker cli, auto-detect with fallback to docker
@@ -83,7 +83,7 @@ run_in_go_container() {
     `# mount the output & source dir, set working directory to the source dir` \
       -v "${OUT_DIR}:/out" -v "${SOURCE_DIR}:/src" -w "/src" \
     `# pass through go settings: modules, proxy, cgo, OS / Arch` \
-      -e GO111MODULE -e GOPROXY -e CGO_ENABLED -e GOOS -e GOARCH \
+      -e GO111MODULE -e GOPROXY -e CGO_ENABLED -e GOOS -e GOARCH -e GOFLAGS \
     `# pass through proxy settings` \
       -e HTTP_PROXY -e HTTPS_PROXY -e NO_PROXY \
     `# run the image with the args passed to this script` \

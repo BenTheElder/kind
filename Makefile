@@ -30,7 +30,16 @@ INSTALL?=install
 INSTALL_DIR?=$(shell hack/build/goinstalldir.sh)
 # record the source commit in the binary
 COMMIT?=$(shell git rev-parse HEAD 2>/dev/null)
-LD_FLAGS:=-X sigs.k8s.io/kind/pkg/cmd/kind/version.GitCommit=$(COMMIT)
+VERSION_FLAG:=-X=sigs.k8s.io/kind/pkg/cmd/kind/version.GitCommit=$(COMMIT)
+# golang compilation options
+# reproducibility:
+# - clear builid: -ldflags=-buildid=
+# - strip filesystem paths from panics (modules instead): -trimpath
+GOFLAGS=-trimpath -ldflags=-buildid=
+# reduce binary size:
+# - strip debugging info (not panics!): -s -w
+GOFLAGS+=-ldflags=-w
+#export GOFLAGS
 # the output binary name, overridden when cross compiling
 KIND_BINARY_NAME?=kind
 # the container cli to use e.g. docker,podman
@@ -41,7 +50,7 @@ all: build
 
 # builds kind in a container, outputs to $(OUT_DIR)
 kind:
-	hack/go_container.sh go build -v -o /out/$(KIND_BINARY_NAME) -ldflags "$(LD_FLAGS)"
+	hack/go_container.sh go build $(GOFLAGS) -v -o /out/$(KIND_BINARY_NAME)
 
 # alias for building kind
 build: kind
