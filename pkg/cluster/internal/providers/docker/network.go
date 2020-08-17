@@ -42,6 +42,31 @@ const fixedNetworkName = "kind"
 
 // ensureNetwork checks if docker network by name exists, if not it creates it
 func ensureNetwork(name string) error {
+	lock := newVolumeLock("kind-network-lock")
+	for {
+		exists, err := checkIfNetworkExists(name)
+		if err != nil {
+			return err
+		}
+		if exists {
+			return nil
+		}
+		locked, err := lock.TryLock()
+		if err != nil {
+			return err
+		}
+		// TODO: we should probably give up after some amount of time
+		// just in case something is wrong
+		if !locked {
+			continue
+		}
+		// real work is done here, once we have the lock
+		return ensureNetworkImpl(name)
+	}
+}
+
+// TODO rename
+func ensureNetworkImpl(name string) error {
 	// TODO: the network might already exist and not have ipv6 ... :|
 	// discussion: https://github.com/kubernetes-sigs/kind/pull/1508#discussion_r414594198
 	exists, err := checkIfNetworkExists(name)

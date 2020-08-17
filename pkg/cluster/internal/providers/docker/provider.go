@@ -66,6 +66,7 @@ func (p *Provider) Provision(status *cli.Status, cfg *config.Cluster) (err error
 		p.logger.Warn("WARNING: Here be dragons! This is not supported currently.")
 		networkName = n
 	}
+	status.Start(fmt.Sprintf("Ensuring %q network 📶", networkName))
 	if err := ensureNetwork(networkName); err != nil {
 		return errors.Wrap(err, "failed to ensure docker network")
 	}

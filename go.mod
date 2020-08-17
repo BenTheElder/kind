@@ -6,6 +6,7 @@ require (
 	github.com/BurntSushi/toml v0.3.1
 	github.com/alessio/shellescape v1.2.2
 	github.com/evanphx/json-patch/v5 v5.1.0
+	github.com/google/uuid v1.1.1
 	github.com/mattn/go-isatty v0.0.12
 	github.com/pelletier/go-toml v1.8.0
 	github.com/pkg/errors v0.9.1
