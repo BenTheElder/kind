@@ -25,6 +25,7 @@ import (
 	"sigs.k8s.io/kind/pkg/cluster/constants"
 	"sigs.k8s.io/kind/pkg/cluster/nodes"
 	"sigs.k8s.io/kind/pkg/errors"
+	"sigs.k8s.io/kind/pkg/exec"
 
 	"sigs.k8s.io/kind/pkg/cluster/internal/create/actions"
 	"sigs.k8s.io/kind/pkg/cluster/internal/kubeadm"
@@ -119,6 +120,19 @@ func (a *Action) Execute(ctx *actions.ActionContext) error {
 	// Create the kubeadm config in all nodes concurrently
 	if err := errors.UntilErrorConcurrent(fns); err != nil {
 		return err
+	}
+
+	/* auto generate certain containerd config patches based on environment */
+	// TODO: currently this assumes all nodes have the same backing filesystem
+	// which should be true for now.
+	out, err := exec.Output(allNodes[0].Command("stat", "-f", "-c", "%T", "/kind"))
+	if err != nil {
+		ctx.Logger.Warn("unable to check if nodes are on zfs")
+	} else if string(out) == "zfs" {
+		// patch to use native snapshotter when on ZFS
+		// this patch should apply before any user patches
+		ctx.Config.ContainerdConfigPatches = append([]string{`[plugins."io.containerd.grpc.v1.cri".containerd]
+snapshotter = "native"`}, ctx.Config.ContainerdConfigPatches...)
 	}
 
 	// if we have containerd config, patch all the nodes concurrently
