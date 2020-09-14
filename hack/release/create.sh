@@ -26,6 +26,7 @@ cd "${REPO_ROOT}"
 # check for arguments
 if [ "$#" -ne 2 ]; then
     echo "Usage: create.sh release-version next-prerelease-version"
+    echo "EX: create.sh 0.3.0 0.4.0"
     exit 1
 fi
 
