@@ -19,6 +19,7 @@ package docker
 import (
 	"fmt"
 	"net"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -26,6 +27,7 @@ import (
 	"sigs.k8s.io/kind/pkg/errors"
 	"sigs.k8s.io/kind/pkg/exec"
 	"sigs.k8s.io/kind/pkg/fs"
+	"sigs.k8s.io/kind/pkg/log"
 
 	"sigs.k8s.io/kind/pkg/cluster/internal/loadbalancer"
 	"sigs.k8s.io/kind/pkg/cluster/internal/providers/common"
@@ -33,7 +35,7 @@ import (
 )
 
 // planCreation creates a slice of funcs that will create the containers
-func planCreation(cfg *config.Cluster, networkName string) (createContainerFuncs []func() error, err error) {
+func planCreation(logger log.Logger, cfg *config.Cluster, networkName string) (createContainerFuncs []func() error, err error) {
 	// we need to know all the names for NO_PROXY
 	// compute the names first before any actual node details
 	nodeNamer := common.MakeNodeNamer(cfg.Name)
@@ -77,6 +79,14 @@ func planCreation(cfg *config.Cluster, networkName string) (createContainerFuncs
 		})
 	}
 
+	// TODO(bentheelder): centralize ""feature gates"" ?
+	etcdYOLO := false
+	if v := os.Getenv("KIND_EXPERIMENTAL_ETCD_YOLO_MODE"); v != "" {
+		logger.Warn("WARNING: etcd data is YOLO due to KIND_EXPERIMENTAL_ETCD_YOLO_MODE")
+		logger.Warn("WARNING: This is not supported and will eat all your data.")
+		etcdYOLO = true
+	}
+
 	// plan normal nodes
 	for i, node := range cfg.Nodes {
 		node := node.DeepCopy() // copy so we can modify
@@ -105,7 +115,13 @@ func planCreation(cfg *config.Cluster, networkName string) (createContainerFuncs
 						ContainerPort: common.APIServerInternalPort,
 					},
 				)
-				args, err := runArgsForNode(node, cfg.Networking.IPFamily, name, genericArgs)
+				baseArgs := genericArgs
+				if etcdYOLO {
+					baseArgs = append([]string{
+						"--tmpfs", "/var/lib/etcd",
+					}, baseArgs...)
+				}
+				args, err := runArgsForNode(node, cfg.Networking.IPFamily, name, baseArgs)
 				if err != nil {
 					return err
 				}

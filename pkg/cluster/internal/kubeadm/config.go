@@ -19,6 +19,7 @@ package kubeadm
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"text/template"
@@ -87,12 +88,20 @@ type DerivedConfigData struct {
 	FeatureGatesString string
 	// RuntimeConfigString is of the form `Foo=true,Baz=false`
 	RuntimeConfigString string
+	// YOLO etcd data
+	ETCDYOLO bool
 }
 
 // Derive automatically derives DockerStableTag if not specified
 func (c *ConfigData) Derive() {
 	if c.DockerStableTag == "" {
 		c.DockerStableTag = strings.Replace(c.KubernetesVersion, "+", "_", -1)
+	}
+
+	// TODO: rethink ""feature gate"" handling
+	// TODO: this has to be gated by k8s version ...
+	if v := os.Getenv("KIND_EXPERIMENTAL_ETCD_YOLO_MODE"); v != "" {
+		c.ETCDYOLO = true
 	}
 
 	// get sorted list of FeatureGate keys
@@ -296,6 +305,12 @@ scheduler:
 networking:
   podSubnet: "{{ .PodSubnet }}"
   serviceSubnet: "{{ .ServiceSubnet }}"
+{{ if .ETCDYOLO -}}
+etcd:
+  local:
+    extraArgs:
+      unsafe-no-fsync: "true"
+{{- end}}
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: InitConfiguration
