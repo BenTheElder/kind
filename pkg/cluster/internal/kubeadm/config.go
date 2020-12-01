@@ -192,7 +192,6 @@ localAPIEndpoint:
 nodeRegistration:
   criSocket: "/run/containerd/containerd.sock"
   kubeletExtraArgs:
-    fail-swap-on: "false"
     node-ip: "{{ .NodeAddress }}"
     provider-id: "kind://{{.NodeProvider}}/{{.ClusterName}}/{{.NodeName}}"
 ---
@@ -210,7 +209,6 @@ controlPlane:
 nodeRegistration:
   criSocket: "/run/containerd/containerd.sock"
   kubeletExtraArgs:
-    fail-swap-on: "false"
     node-ip: "{{ .NodeAddress }}"
     provider-id: "kind://{{.NodeProvider}}/{{.ClusterName}}/{{.NodeName}}"
 discovery:
@@ -237,6 +235,8 @@ evictionHard:
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
 serializeImagePulls: false
+# so we can run kind on hosts with swap enabled 🤷‍♂️
+failSwapOn: false
 {{if .FeatureGates}}featureGates:
 {{ range $key := .SortedFeatureGateKeys }}
   "{{ $key }}": {{$.FeatureGates $key }}
@@ -313,7 +313,6 @@ localAPIEndpoint:
 nodeRegistration:
   criSocket: "unix:///run/containerd/containerd.sock"
   kubeletExtraArgs:
-    fail-swap-on: "false"
     node-ip: "{{ .NodeAddress }}"
     provider-id: "kind://{{.NodeProvider}}/{{.ClusterName}}/{{.NodeName}}"
 ---
@@ -331,7 +330,6 @@ controlPlane:
 nodeRegistration:
   criSocket: "unix:///run/containerd/containerd.sock"
   kubeletExtraArgs:
-    fail-swap-on: "false"
     node-ip: "{{ .NodeAddress }}"
     provider-id: "kind://{{.NodeProvider}}/{{.ClusterName}}/{{.NodeName}}"
 discovery:
@@ -358,6 +356,8 @@ evictionHard:
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
 serializeImagePulls: false
+# so we can run kind on hosts with swap enabled 🤷‍♂️
+failSwapOn: false
 {{if .FeatureGates}}featureGates:
 {{ range $key := .SortedFeatureGateKeys }}
   "{{ $key }}": {{ index $.FeatureGates $key }}
