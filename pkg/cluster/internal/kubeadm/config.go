@@ -236,6 +236,7 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
+serializeImagePulls: false
 {{if .FeatureGates}}featureGates:
 {{ range $key := .SortedFeatureGateKeys }}
   "{{ $key }}": {{$.FeatureGates $key }}
@@ -356,6 +357,7 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
+serializeImagePulls: false
 {{if .FeatureGates}}featureGates:
 {{ range $key := .SortedFeatureGateKeys }}
   "{{ $key }}": {{ index $.FeatureGates $key }}
