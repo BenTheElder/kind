@@ -113,7 +113,7 @@ networking:
 {{< securitygoose >}}**NOTE**: You should really think thrice before exposing your kind cluster publicly!
 kind does not ship with state of the art security or any update strategy (other than
 disposing your cluster and creating a new one)! We strongly discourage exposing kind
-to anything other than loopback.{{</ securitygoose >}}
+to anything other than loopback / localhost.{{</ securitygoose >}}
 
 #### Pod Subnet
 
