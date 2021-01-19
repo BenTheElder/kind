@@ -152,6 +152,8 @@ func clusterHasImplicitLoadBalancer(cfg *config.Cluster) bool {
 func commonArgs(cluster string, cfg *config.Cluster, networkName string, nodeNames []string) ([]string, error) {
 	// standard arguments all nodes containers need, computed once
 	args := []string{
+		// TODO: TEMP HACK
+		"--platform=linux/arm64",
 		"--detach", // run the container detached
 		"--tty",    // allocate a tty for entrypoint logs
 		// label the node with the cluster ID
