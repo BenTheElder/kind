@@ -55,12 +55,14 @@ IMAGE="kindest/node:${kube_version}"
 images=()
 for arch in "${__arches__[@]}"; do
     image="kindest/node-${arch}:${kube_version}"
-    "${REPO_ROOT}/bin/kind" build node-image --image="${image}" --arch="${arch}" "${KUBEROOT}"
-    images+=("${image}")
     # TODO: this is a workaround for an annoying kubernetes build bug
     # we should get this fixed in kubernetes
     # it only affects 1.19.X and 1.20.X
     docker image ls -q k8s.gcr.io/build-image/debian-iptables | xargs docker rmi || true
+    docker image pull --platform="linux/${arch}" k8s.gcr.io/build-image/debian-iptables:buster-v1.3.0
+    # end terrible workaround
+    "${REPO_ROOT}/bin/kind" build node-image --image="${image}" --arch="${arch}" "${KUBEROOT}"
+    images+=("${image}")
 done
 
 # combine to manifest list tagged with kubernetes version
