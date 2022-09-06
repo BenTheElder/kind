@@ -283,7 +283,7 @@ evictionHard:
   imagefs.available: "0%"
 {{if .FeatureGates}}featureGates:
 {{ range $index, $gate := .SortedFeatureGates }}
-  "{{ $gate .Name }}": {{ $gate .Value }}
+  "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
 {{if ne .KubeProxyMode "None"}}
 ---
@@ -294,7 +294,7 @@ metadata:
 mode: "{{ .KubeProxyMode }}"
 {{if .FeatureGates}}featureGates:
 {{ range $index, $gate := .SortedFeatureGates }}
-  "{{ $gate .Name }}": {{ $gate .Value }}
+  "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
 iptables:
   minSyncPeriod: 1s
@@ -420,7 +420,7 @@ evictionHard:
   imagefs.available: "0%"
 {{if .FeatureGates}}featureGates:
 {{ range $index, $gate := .SortedFeatureGates }}
-  "{{ $gate .Name }}": {{ $gate .Value }}
+  "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
 {{if .DisableLocalStorageCapacityIsolation}}localStorageCapacityIsolation: false{{end}}
 {{if ne .KubeProxyMode "None"}}
@@ -432,7 +432,7 @@ metadata:
 mode: "{{ .KubeProxyMode }}"
 {{if .FeatureGates}}featureGates:
 {{ range $index, $gate := .SortedFeatureGates }}
-  "{{ $gate .Name }}": {{ $gate .Value }}
+  "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
 iptables:
   minSyncPeriod: 1s
