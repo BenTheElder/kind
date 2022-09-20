@@ -97,10 +97,6 @@ type DerivedConfigData struct {
 	DockerStableTag string
 	// SortedFeatureGatess allows us to iterate FeatureGates deterministically
 	SortedFeatureGates []FeatureGate
-	// FeatureGatesString is of the form `Foo=true,Baz=false`
-	FeatureGatesString string
-	// RuntimeConfigString is of the form `Foo=true,Baz=false`
-	RuntimeConfigString string
 	// KubeadmFeatureGates contains Kubeadm only feature gates
 	KubeadmFeatureGates map[string]bool
 	// IPv4 values take precedence over IPv6 by default, if true set IPv6 default values
@@ -137,35 +133,14 @@ func (c *ConfigData) Derive() {
 	}
 	sort.Strings(featureGateKeys)
 
-	// create a sorted key=value,... string of FeatureGates
+	// create a sorted slice of FeatureGates
 	c.SortedFeatureGates = make([]FeatureGate, 0, len(c.FeatureGates))
-	featureGates := make([]string, 0, len(c.FeatureGates))
 	for _, k := range featureGateKeys {
-		v := c.FeatureGates[k]
-		featureGates = append(featureGates, fmt.Sprintf("%s=%t", k, v))
 		c.SortedFeatureGates = append(c.SortedFeatureGates, FeatureGate{
 			Name:  k,
 			Value: c.FeatureGates[k],
 		})
 	}
-	c.FeatureGatesString = strings.Join(featureGates, ",")
-
-	// create a sorted key=value,... string of RuntimeConfig
-	// first get sorted list of FeatureGate keys
-	runtimeConfigKeys := make([]string, 0, len(c.RuntimeConfig))
-	for k := range c.RuntimeConfig {
-		runtimeConfigKeys = append(runtimeConfigKeys, k)
-	}
-	sort.Strings(runtimeConfigKeys)
-	// stringify
-	var runtimeConfig []string
-	for _, k := range runtimeConfigKeys {
-		v := c.RuntimeConfig[k]
-		// TODO: do we need to quote / escape these in the future?
-		// Currently runtime config is in practice booleans, no special characters
-		runtimeConfig = append(runtimeConfig, fmt.Sprintf("%s=%s", k, v))
-	}
-	c.RuntimeConfigString = strings.Join(runtimeConfig, ",")
 }
 
 // See docs for these APIs at:
@@ -192,14 +167,14 @@ controlPlaneEndpoint: "{{ .ControlPlaneEndpoint }}"
 apiServer:
   certSANs: [localhost, "{{.APIServerAddress}}"]
   extraArgs:
-    "runtime-config": "{{ .RuntimeConfigString }}"
+    "runtime-config": "{{ stringMapToRuntimeConfigFlag .RuntimeConfig }}"
 {{ if .FeatureGates }}
-    "feature-gates": "{{ .FeatureGatesString }}"
+    "feature-gates": "{{ sortedFeatureGatesToFeatureGatesFlag .SortedFeatureGates }}"
 {{ end}}
 controllerManager:
   extraArgs:
 {{ if .FeatureGates }}
-    "feature-gates": "{{ .FeatureGatesString }}"
+    "feature-gates": "{{ sortedFeatureGatesToFeatureGatesFlag .SortedFeatureGates }}"
 {{ end }}
     enable-hostpath-provisioner: "true"
     # configure ipv6 default addresses for IPv6 clusters
@@ -209,7 +184,7 @@ controllerManager:
 scheduler:
   extraArgs:
 {{ if .FeatureGates }}
-    "feature-gates": "{{ .FeatureGatesString }}"
+    "feature-gates": "{{ sortedFeatureGatesToFeatureGatesFlag .SortedFeatureGates }}"
 {{ end }}
     # configure ipv6 default addresses for IPv6 clusters
     {{ if .IPv6 -}}
@@ -329,14 +304,14 @@ controlPlaneEndpoint: "{{ .ControlPlaneEndpoint }}"
 apiServer:
   certSANs: [localhost, "{{.APIServerAddress}}"]
   extraArgs:
-    "runtime-config": "{{ .RuntimeConfigString }}"
+    "runtime-config": "{{ stringMapToRuntimeConfigFlag .RuntimeConfig }}"
 {{ if .FeatureGates }}
-    "feature-gates": "{{ .FeatureGatesString }}"
+    "feature-gates": "{{ sortedFeatureGatesToFeatureGatesFlag .SortedFeatureGates }}"
 {{ end}}
 controllerManager:
   extraArgs:
 {{ if .FeatureGates }}
-    "feature-gates": "{{ .FeatureGatesString }}"
+    "feature-gates": "{{ sortedFeatureGatesToFeatureGatesFlag .SortedFeatureGates }}"
 {{ end }}
     enable-hostpath-provisioner: "true"
     # configure ipv6 default addresses for IPv6 clusters
@@ -346,7 +321,7 @@ controllerManager:
 scheduler:
   extraArgs:
 {{ if .FeatureGates }}
-    "feature-gates": "{{ .FeatureGatesString }}"
+    "feature-gates": "{{ sortedFeatureGatesToFeatureGatesFlag .SortedFeatureGates }}"
 {{ end }}
     # configure ipv6 default addresses for IPv6 clusters
     {{ if .IPv6 -}}
@@ -486,7 +461,35 @@ func Config(data ConfigData) (config string, err error) {
 		templateSource = ConfigTemplateBetaV2
 	}
 
-	t, err := yamltemplate.New("kubeadm-config").Parse(templateSource)
+	funcs := yamltemplate.FuncMap{
+		"stringMapToRuntimeConfigFlag": func(rc map[string]string) string {
+			// create a sorted key=value,... string of RuntimeConfig
+			// first get sorted list of FeatureGate keys
+			keys := make([]string, 0, len(rc))
+			for k := range rc {
+				keys = append(keys, k)
+			}
+			sort.Strings(keys)
+			// stringify
+			var runtimeConfig []string
+			for _, k := range keys {
+				v := rc[k]
+				// TODO: do we need to quote / escape these in the future?
+				// Currently runtime config is in practice booleans, no special characters
+				runtimeConfig = append(runtimeConfig, fmt.Sprintf("%s=%s", k, v))
+			}
+			return strings.Join(runtimeConfig, ",")
+		},
+		"sortedFeatureGatesToFeatureGatesFlag": func(sfg []FeatureGate) string {
+			flag := ""
+			for _, fg := range sfg {
+				flag += fmt.Sprintf("%s=%t", fg.Name, fg.Value)
+			}
+			return flag
+		},
+	}
+
+	t, err := yamltemplate.New("kubeadm-config").Funcs(funcs).Parse(templateSource)
 	if err != nil {
 		return "", errors.Wrap(err, "failed to parse config template")
 	}
