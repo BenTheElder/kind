@@ -480,7 +480,7 @@ func Config(data ConfigData) (config string, err error) {
 			}
 			return strings.Join(runtimeConfig, ",")
 		},
-		"sortedFeatureGatesToFeatureGatesFlag": func(sfg []FeatureGate) string {
+		"sortedFeatureGatesToFeatureGatesFlag": func(sfg []*FeatureGate) string {
 			flag := ""
 			for _, fg := range sfg {
 				flag += fmt.Sprintf("%s=%t", fg.Name, fg.Value)
