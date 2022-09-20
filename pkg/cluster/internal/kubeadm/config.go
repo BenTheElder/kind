@@ -393,7 +393,7 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
-featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
+featureGates:{{if not (StructuralData .FeatureGates)}}{{" {}"}}{{else}}
 {{ range $index, $gate := (StructuralData .SortedFeatureGates) }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
@@ -405,7 +405,7 @@ kind: KubeProxyConfiguration
 metadata:
   name: config
 mode: "{{ .KubeProxyMode }}"
-featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
+featureGates:{{if not (StructuralData .FeatureGates)}}{{" {}"}}{{else}}
 {{ range $index, $gate := (StructuralData .SortedFeatureGates) }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
