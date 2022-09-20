@@ -256,7 +256,7 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
-  featureGates:{{if .FeatureGates}}
+  featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
@@ -267,7 +267,7 @@ kind: KubeProxyConfiguration
 metadata:
   name: config
 mode: "{{ .KubeProxyMode }}"
-  featureGates:{{if .FeatureGates}}
+  featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
@@ -393,7 +393,7 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
-  featureGates:{{if .FeatureGates}}
+  featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
@@ -405,7 +405,7 @@ kind: KubeProxyConfiguration
 metadata:
   name: config
 mode: "{{ .KubeProxyMode }}"
-  featureGates:{{if .FeatureGates}}
+  featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
