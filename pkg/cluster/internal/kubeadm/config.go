@@ -256,10 +256,10 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
-{{if .FeatureGates}}featureGates:
+  featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{end}}
+{{end}}{{else}}{{ " {}" }}{{end}}
 {{if ne .KubeProxyMode "None"}}
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
@@ -267,10 +267,10 @@ kind: KubeProxyConfiguration
 metadata:
   name: config
 mode: "{{ .KubeProxyMode }}"
-{{if .FeatureGates}}featureGates:
+  featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{end}}
+{{end}}{{else}}{{ " {}" }}{{end}}
 iptables:
   minSyncPeriod: 1s
 conntrack:
@@ -393,10 +393,10 @@ evictionHard:
   nodefs.available: "0%"
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
-{{if .FeatureGates}}featureGates:
+  featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{end}}
+{{end}}{{else}}{{ " {}" }}{{end}}
 {{if .DisableLocalStorageCapacityIsolation}}localStorageCapacityIsolation: false{{end}}
 {{if ne .KubeProxyMode "None"}}
 ---
@@ -405,10 +405,10 @@ kind: KubeProxyConfiguration
 metadata:
   name: config
 mode: "{{ .KubeProxyMode }}"
-{{if .FeatureGates}}featureGates:
+  featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{end}}
+{{end}}{{else}}{{ " {}" }}{{end}}
 iptables:
   minSyncPeriod: 1s
 conntrack:
