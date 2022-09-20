@@ -394,7 +394,7 @@ evictionHard:
   nodefs.inodesFree: "0%"
   imagefs.available: "0%"
 featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
-{{ range $index, $gate := .SortedFeatureGates }}
+{{ range $index, $gate := (StructuralData .SortedFeatureGates) }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
 {{if .DisableLocalStorageCapacityIsolation}}localStorageCapacityIsolation: false{{end}}
@@ -406,7 +406,7 @@ metadata:
   name: config
 mode: "{{ .KubeProxyMode }}"
 featureGates:{{if not .FeatureGates}}{{" {}"}}{{else}}
-{{ range $index, $gate := .SortedFeatureGates }}
+{{ range $index, $gate := (StructuralData .SortedFeatureGates) }}
   "{{ $gate.Name }}": {{ $gate.Value }}
 {{end}}{{end}}
 iptables:
