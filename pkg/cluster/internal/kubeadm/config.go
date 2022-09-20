@@ -96,7 +96,7 @@ type DerivedConfigData struct {
 	// DockerStableTag is automatically derived from KubernetesVersion
 	DockerStableTag string
 	// SortedFeatureGatess allows us to iterate FeatureGates deterministically
-	SortedFeatureGates []FeatureGate
+	SortedFeatureGates []*FeatureGate
 	// KubeadmFeatureGates contains Kubeadm only feature gates
 	KubeadmFeatureGates map[string]bool
 	// IPv4 values take precedence over IPv6 by default, if true set IPv6 default values
@@ -134,9 +134,9 @@ func (c *ConfigData) Derive() {
 	sort.Strings(featureGateKeys)
 
 	// create a sorted slice of FeatureGates
-	c.SortedFeatureGates = make([]FeatureGate, 0, len(c.FeatureGates))
+	c.SortedFeatureGates = make([]*FeatureGate, 0, len(c.FeatureGates))
 	for _, k := range featureGateKeys {
-		c.SortedFeatureGates = append(c.SortedFeatureGates, FeatureGate{
+		c.SortedFeatureGates = append(c.SortedFeatureGates, &FeatureGate{
 			Name:  k,
 			Value: c.FeatureGates[k],
 		})
