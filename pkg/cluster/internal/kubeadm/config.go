@@ -259,7 +259,7 @@ evictionHard:
   featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{else}}{{ " {}" }}{{end}}
+{{end}}{{end}}
 {{if ne .KubeProxyMode "None"}}
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
@@ -270,7 +270,7 @@ mode: "{{ .KubeProxyMode }}"
   featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{else}}{{ " {}" }}{{end}}
+{{end}}{{end}}
 iptables:
   minSyncPeriod: 1s
 conntrack:
@@ -396,7 +396,7 @@ evictionHard:
   featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{else}}{{ " {}" }}{{end}}
+{{end}}{{end}}
 {{if .DisableLocalStorageCapacityIsolation}}localStorageCapacityIsolation: false{{end}}
 {{if ne .KubeProxyMode "None"}}
 ---
@@ -408,7 +408,7 @@ mode: "{{ .KubeProxyMode }}"
   featureGates:{{if .FeatureGates}}
 {{ range $index, $gate := .SortedFeatureGates }}
   "{{ $gate.Name }}": {{ $gate.Value }}
-{{end}}{{else}}{{ " {}" }}{{end}}
+{{end}}{{end}}
 iptables:
   minSyncPeriod: 1s
 conntrack:
