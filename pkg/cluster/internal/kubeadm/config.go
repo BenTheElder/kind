@@ -395,7 +395,7 @@ evictionHard:
   imagefs.available: "0%"
 featureGates:{{if not (StructuralData .FeatureGates)}}{{" {}"}}{{else}}
 {{ range $index, $gate := (StructuralData .SortedFeatureGates) }}
-  "{{ $gate.Name }}": {{ $gate.Value }}
+  "{{ (StructuralData $gate.Name) }}": {{ $gate.Value }}
 {{end}}{{end}}
 {{if .DisableLocalStorageCapacityIsolation}}localStorageCapacityIsolation: false{{end}}
 {{if ne .KubeProxyMode "None"}}
@@ -407,7 +407,7 @@ metadata:
 mode: "{{ .KubeProxyMode }}"
 featureGates:{{if not (StructuralData .FeatureGates)}}{{" {}"}}{{else}}
 {{ range $index, $gate := (StructuralData .SortedFeatureGates) }}
-  "{{ $gate.Name }}": {{ $gate.Value }}
+  "{{ (StructuralData $gate.Name) }}": {{ $gate.Value }}
 {{end}}{{end}}
 iptables:
   minSyncPeriod: 1s
