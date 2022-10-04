@@ -23,6 +23,7 @@ import (
 	"sort"
 
 	"sigs.k8s.io/kind/pkg/cmd/kind/version"
+	"sigs.k8s.io/kind/pkg/fs"
 
 	"sigs.k8s.io/kind/pkg/cluster/constants"
 	"sigs.k8s.io/kind/pkg/cluster/nodes"
@@ -179,7 +180,29 @@ func (p *Provider) Create(name string, options ...CreateOption) error {
 			return err
 		}
 	}
-	return internalcreate.Cluster(p.logger, p.provider, opts)
+	// create the cluster
+	createErr := internalcreate.Cluster(p.logger, p.provider, opts)
+	// if we succesfully created the cluster, we should be done
+	if createErr == nil {
+		return nil
+	}
+	// collect logs on failure
+	// TODO: add an option for this
+	if opts.CollectLogsOnFailure {
+		logPath, dirErr := fs.TempDir("", "kind-logs")
+		if dirErr != nil {
+
+		} else {
+			// TODO: handle error
+			_ = p.CollectLogs(name, logPath)
+		}
+	}
+	// cleanup if retain is not set
+	if !opts.Retain {
+		// TODO: handle error
+		_ = p.Delete(opts.Config.Name, opts.KubeconfigPath)
+	}
+	return createErr
 }
 
 // Delete tears down a kubernetes-in-docker cluster

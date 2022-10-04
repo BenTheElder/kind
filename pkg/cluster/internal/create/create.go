@@ -133,9 +133,6 @@ func Cluster(logger log.Logger, p providers.Provider, opts *ClusterOptions) erro
 	actionsContext := actions.NewActionContext(logger, status, p, opts.Config)
 	for _, action := range actionsToRun {
 		if err := action.Execute(actionsContext); err != nil {
-			if !opts.Retain {
-				_ = delete.Cluster(logger, p, opts.Config.Name, opts.KubeconfigPath)
-			}
 			return err
 		}
 	}
