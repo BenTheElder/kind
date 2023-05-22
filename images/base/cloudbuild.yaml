@@ -6,3 +6,9 @@ steps:
 - name: gcr.io/k8s-testimages/krte:latest-master
   entrypoint: make
   args: ['-C', 'images/base', 'push']
+# TODO: remove later
+# temporarily pushing a second base image with containerd 1.7.x for CDI development
+- name: gcr.io/k8s-testimages/krte:latest-master
+  entrypoint: make
+  args: ['-C', 'images/base', 'push', 'CONTAINERD_VERSION=v1.7.1', 'TAG_SUFFIX=_containerd-v1.7.1']
+
