@@ -579,4 +579,5 @@ select_iptables
 enable_network_magic
 
 # we want the command (expected to be systemd) to be PID1, so exec to it
+log_info 'starting init'
 exec "$@"
