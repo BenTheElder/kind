@@ -1,0 +1,11 @@
+go 1.20
+
+use (
+	// main project
+	.
+	// kindnetd
+	./images/kindnetd
+	// tools
+	./hack/tools
+	./site
+)
