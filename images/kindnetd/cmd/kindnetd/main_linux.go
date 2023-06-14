@@ -338,16 +338,3 @@ func probeTCP(address string, timeout time.Duration) bool {
 	klog.Warningf("OTHER %s: %v", address, err)
 	return false
 }
-
-// isIPv6String returns if ip is IPv6.
-func isIPv6String(ip string) bool {
-	netIP := net.ParseIP(ip)
-	return netIP != nil && netIP.To4() == nil
-}
-
-// isIPv6CIDRString returns if cidr is IPv6.
-// This assumes cidr is a valid CIDR.
-func isIPv6CIDRString(cidr string) bool {
-	ip, _, _ := net.ParseCIDR(cidr)
-	return ip != nil && ip.To4() == nil
-}
