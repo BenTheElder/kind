@@ -43,8 +43,16 @@ package_to_copyright() {
 stage_file() {
     cp -a --parents "${1}" "${2}"
     # recursively follow symlinks
+    stage_file_symlink() {
+        cp -a --parents "${1}" "${2}"
+        # recursively follow symlinks
+        if [[ -L "${1}" ]]; then
+            stage_file_symlink "$(cd "$(dirname "${1}")"; realpath -s "$(readlink "${1}")")" "${2}"
+        fi
+    }
     if [[ -L "${1}" ]]; then
-        stage_file "$(cd "$(dirname "${1}")"; realpath -s "$(readlink "${1}")")" "${2}"
+        # we only need to chase these down and copy them, we reasonably assume they're from the same package
+        stage_file_symlink "$(cd "$(dirname "${1}")"; realpath -s "$(readlink "${1}")")" "${2}"
     fi
     # get the package so we can stage package metadata as well
     package="$(file_to_package "${1}")"
