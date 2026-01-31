@@ -189,11 +189,11 @@ data:
             ]
     }
   setup: |-
-    #!/bin/sh
+    #!/usr/bin/sh
     set -eu
     mkdir -m 0777 -p "$VOL_DIR"
   teardown: |-
-    #!/bin/sh
+    #!/usr/bin/sh
     set -eu
     rm -rf "$VOL_DIR"
   helperPod.yaml: |-
